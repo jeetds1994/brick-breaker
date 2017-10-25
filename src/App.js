@@ -43,11 +43,19 @@ class App extends Component {
       if(block[0] < leftPos && block[1] > rightPos && block[2] < topPos && block[3] > bottomPos){
         document.getElementById(block[4]).remove()
         arr[index] = []
-        this.setState({blockPositions: arr})
+        this.setState({blockPositions: arr, ballVX: this.state.ballVX * -1})
         console.log("COLLISION")
       }
     })
 
+  }
+
+  paddleCollision = () => {
+    let paddle = document.getElementById("paddle").getBoundingClientRect()
+    let ball = document.getElementById("ball").getBoundingClientRect()
+    if(paddle.left < ball.left && paddle.right > ball.right && paddle.bottom > ball.bottom && paddle.top - 20 < ball.top){
+      this.setState({ballVY: this.state.ballVY * -1})
+    }
   }
 
   tick = () => {
@@ -67,10 +75,14 @@ class App extends Component {
       if(this.state.ballLeft < 0 || this.state.ballLeft > width){
         this.setState({ballVX: this.state.ballVX * -1})
       }
-      if(this.state.ballTop < 0 || this.state.ballTop > height){
+      if(this.state.ballTop < 0){
         this.setState({ballVY: this.state.ballVY * -1})
       }
+      // handle paddle COLLISION
+      this.paddleCollision()
   }
+
+
 
   componentDidMount(){
     //store the block positions
@@ -80,6 +92,10 @@ class App extends Component {
       request: requestAnimationFrame(this.tick)
     });
     window.addEventListener("load", (e) => {
+
+      window.addEventListener("click", () => {
+        this.paddleCollision()
+      })
 
       window.addEventListener("mousemove", (event) => {
         //console.log("x", event.pageX, "y", event.pageY)
