@@ -88,7 +88,11 @@ class App extends Component {
   paddleCollision = () => {
     let paddle = document.getElementById("paddle").getBoundingClientRect()
     let ball = document.getElementById("ball").getBoundingClientRect()
-    if(paddle.left < ball.left && paddle.right > ball.right && paddle.bottom > ball.bottom && paddle.top - 20 < ball.top){
+    //old way
+    // if(paddle.left < ball.left && paddle.right > ball.right && paddle.bottom > ball.bottom && paddle.top - 20 < ball.top){
+    //   this.setState({ballVY: this.state.ballVY * -1})
+    // }
+    if(paddle.left <= ball.right && paddle.right >= ball.left && paddle.top <= ball.bottom && paddle.bottom >= ball.top){
       this.setState({ballVY: this.state.ballVY * -1})
     }
   }
