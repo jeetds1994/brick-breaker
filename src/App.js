@@ -51,13 +51,36 @@ class App extends Component {
     let topPos = ball.top
     let bottomPos = ball.bottom
     this.state.blockPositions.forEach((block, index, arr) => {
-      if(block[0] < leftPos && block[1] > rightPos && block[2] < topPos && block[3] > bottomPos){
-        document.getElementById(block[4]).remove()
-        arr[index] = []
-        this.setState({blockPositions: arr, ballVX: this.state.ballVX * -1})
-        console.log("COLLISION")
-        this.setState({ counter: ++this.state.counter})
-      }
+      //old way and will eliminate center
+      // if(block[0] < leftPos && block[1] > rightPos && block[2] < topPos && block[3] > bottomPos){
+      //   debugger
+      //   document.getElementById(block[4]).remove()
+      //   arr[index] = []
+      //   this.setState({blockPositions: arr, ballVX: this.state.ballVX * -1})
+      //   console.log("COLLISION")
+      //   this.setState({ counter: ++this.state.counter})
+      // }
+
+      //works
+      // if(block[0] <= rightPos && block[1] + 25 >= leftPos && block[2] <= bottomPos && block[3] >= topPos){
+      //       document.getElementById(block[4]).remove()
+      //       arr[index] = []
+      //       this.setState({blockPositions: arr, ballVX: this.state.ballVX * -1})
+      //       console.log("COLLISION")
+      //       this.setState({ counter: ++this.state.counter})
+      //   }
+
+      if(block[0] <= rightPos && block[1] + 25 >= leftPos && block[2] <= bottomPos && block[3] >= topPos){
+          if(block[2] <= bottomPos && block[3] >= topPos){
+            this.setState({blockPositions: arr, ballVY: this.state.ballVY * -1})
+          }else{
+            this.setState({blockPositions: arr, ballVX: this.state.ballVX * -1})
+          }
+            this.setState({ counter: ++this.state.counter})
+            console.log("COLLISION")
+            document.getElementById(block[4]).remove()
+            arr[index] = []
+        }
     })
 
   }
@@ -113,6 +136,8 @@ class App extends Component {
     // moves paddle
       window.addEventListener("mousemove", (event) => {
         //console.log("x", event.pageX, "y", event.pageY)
+        console.log(event.pageX)
+        console.log(event.pageY)
         this.setState({paddleLeft: event.pageX})
       })
   }
@@ -146,6 +171,10 @@ class App extends Component {
 
   componentDidMount(){
     window.addEventListener("load", (e) => {
+
+      window.addEventListener("click", (currenMotion) => {
+        debugger
+      })
 
       window.addEventListener("keydown", (event) => {
         if(event.key === "s" || event.key === "S" && this.state.startGame === false){
