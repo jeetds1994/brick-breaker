@@ -241,8 +241,8 @@ class App extends Component {
       position: "absolute",
       left: this.state.paddleLeft,
       bottom: 0,
-      transition: "all .1s ease",
-      transform: "translateX(5px)"
+      // transition: "all .1s ease",
+      // transform: "translateX(5px)"
     }
 
     const ballStyle = {
