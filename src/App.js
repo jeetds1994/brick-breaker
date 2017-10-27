@@ -241,6 +241,8 @@ class App extends Component {
       position: "absolute",
       left: this.state.paddleLeft,
       bottom: 0,
+      transition: "all .1s ease",
+      transform: "translateX(5px)"
     }
 
     const ballStyle = {
@@ -249,7 +251,7 @@ class App extends Component {
       width: "25px",
       position: "absolute",
       top: this.state.ballTop,
-      left: this.state.ballLeft
+      left: this.state.ballLeft,
     }
 
     const gameDivStyle = {
