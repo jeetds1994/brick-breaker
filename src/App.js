@@ -2,6 +2,12 @@ import React, { Component } from 'react';
 import './App.css';
 
 import SayHello from './SayHello'
+import Score from './Score'
+import SettingButton from './SettingButton'
+import Menu from './Menu'
+import Pause from './Pause'
+import Setting from './Setting'
+import LostGame from './LostGame'
 
 class App extends Component {
   constructor(){
@@ -12,10 +18,15 @@ class App extends Component {
       ballTop: 200,
       ballVX: 300,
       ballVY: -300,
-      blockPositions: []
+      blockPositions: [],
+      counter: 0,
+      startGame: false,
+      pauseGame: false,
+      gameDivStyleOpacity: 1.0,
+      settings: false,
+      grayscale: 'grayscale(0%)',
+      lostGame: false
     }
-
-    this.collisionChecker = this.collisionChecker.bind(this)
   }
 
   getBlockPos = () => {
@@ -45,6 +56,7 @@ class App extends Component {
         arr[index] = []
         this.setState({blockPositions: arr, ballVX: this.state.ballVX * -1})
         console.log("COLLISION")
+        this.setState({ counter: ++this.state.counter})
       }
     })
 
@@ -64,7 +76,8 @@ class App extends Component {
          ballLeft: this.state.ballLeft + (this.state.ballVX * 0.017),
          ballTop: this.state.ballTop + (this.state.ballVY * 0.017)
       });
-
+      //check if game is paused
+      if(this.state.pauseGame){cancelAnimationFrame(this.state.request)}
 
       //checks for COLLISION
       this.collisionChecker()
@@ -78,41 +91,109 @@ class App extends Component {
       if(this.state.ballTop < 0){
         this.setState({ballVY: this.state.ballVY * -1})
       }
+
+      if(this.state.ballTop > height){
+        console.log("LOST")
+        this.lostGame()
+      }
+
       // handle paddle COLLISION
       this.paddleCollision()
   }
 
-
-
-  componentDidMount(){
+  startGame = () => {
     //store the block positions
     this.getBlockPos()
 
+    //loop
     this.setState({
       request: requestAnimationFrame(this.tick)
     });
-    window.addEventListener("load", (e) => {
 
-      window.addEventListener("click", () => {
-        this.paddleCollision()
-      })
-
+    // moves paddle
       window.addEventListener("mousemove", (event) => {
         //console.log("x", event.pageX, "y", event.pageY)
+        this.setState({paddleLeft: event.pageX})
+      })
+  }
 
-        this.setState({
-          paddleLeft: event.pageX,
-          ball: {
-            backgroundColor: 'gray',
-            height: "25px",
-            width: "100px",
-            position: "absolute",
-          }
-        })
+  lostGame = () => {
+    cancelAnimationFrame(this.state.request)
+    let opacity = this.state.pauseGame ? 1.0 : 0.1
+    this.setState({
+        gameDivStyleOpacity: opacity,
+        lostGame: true
+    })
+  }
+
+  restartGame = () => {
+    this.setState({
+      paddleLeft: 0,
+      ballLeft: 100,
+      ballTop: 200,
+      ballVX: 300,
+      ballVY: -300,
+      blockPositions: [],
+      counter: 0,
+      startGame: false,
+      pauseGame: false,
+      gameDivStyleOpacity: 1.0,
+      settings: false,
+      grayscale: 'grayscale(0%)',
+      lostGame: false
+    })
+  }
+
+  componentDidMount(){
+    window.addEventListener("load", (e) => {
+
+      window.addEventListener("keydown", (event) => {
+        if(event.key === "s" || event.key === "S" && this.state.startGame === false){
+          //set state and startGame
+          this.triggerStartGame()
+        }else if (event.key === "p" && this.state.startGame === true) {
+          // set state and pauseGame
+          this.triggerPauseGame()
+        }
       })
     })
   }
 
+  triggerStartGame = () => {
+    this.setState({startGame: true}, this.startGame)
+  }
+
+  triggerPauseGame = () => {
+    let opacity = this.state.pauseGame ? 1.0 : 0.1
+    this.setState({
+      pauseGame: !this.state.pauseGame,
+      gameDivStyleOpacity: opacity,
+      settings: false
+    }, this.startGame)
+  }
+
+  triggerSettings = () => {
+    let opacity = this.state.pauseGame ? 1.0 : 0.1
+    this.setState({
+      settings: !this.state.settings,
+      pauseGame: !this.state.pauseGame,
+      gameDivStyleOpacity: opacity
+    }, this.startGame)
+  }
+
+  triggerGrayScale = () => {
+    let grayscale = this.state.grayscale === 'grayscale(0%)' ? 'grayscale(100%)' : 'grayscale(0%)'
+    this.setState({grayscale})
+  }
+
+  triggerResume = () => {
+    let opacity = this.state.pauseGame ? 1.0 : 0.1
+    this.setState({
+      pauseGame: !this.state.pauseGame,
+      gameDivStyleOpacity: opacity,
+      settings: false
+    }, this.startGame)
+  }
 
   render() {
     const paddleStyle = {
@@ -133,12 +214,33 @@ class App extends Component {
       left: this.state.ballLeft
     }
 
+    const gameDivStyle = {
+      WebkitFilter: this.state.grayscale,
+      opacity: this.state.gameDivStyleOpacity
+    }
+
     return (
       <div className="App">
-        <div style={paddleStyle} id="paddle" ></div>
-        <div style={ballStyle} id="ball"></div>
 
-        <SayHello />
+        {!this.state.startGame && <Menu triggerStartGame={this.triggerStartGame}/>}
+
+        {this.state.startGame && <div id="game" style={gameDivStyle}>
+          <div style={paddleStyle} id="paddle" ></div>
+          <div style={ballStyle} id="ball"></div>
+          <SettingButton triggerSettings={this.triggerSettings} />
+          <Score score={this.state.counter}/>
+          <SayHello />
+        </div>}
+
+        {this.state.pauseGame && <div>
+          <Pause triggerResume={this.triggerResume}/>
+        </div>}
+
+        {this.state.settings && <div>
+          <Setting triggerGrayScale={this.triggerGrayScale}/>
+        </div>}
+
+        {this.state.lostGame && <LostGame restartGame={this.restartGame}/>}
 
       </div>
     );
