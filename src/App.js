@@ -92,7 +92,7 @@ class App extends Component {
     // if(paddle.left < ball.left && paddle.right > ball.right && paddle.bottom > ball.bottom && paddle.top - 20 < ball.top){
     //   this.setState({ballVY: this.state.ballVY * -1})
     // }
-    if(paddle.left <= ball.right && paddle.right >= ball.left && paddle.top <= ball.bottom && paddle.bottom >= ball.top){
+    if(paddle.left <= ball.right && paddle.right + 5 >= ball.left && paddle.top <= ball.bottom && paddle.bottom >= ball.top){
       this.setState({ballVY: this.state.ballVY * -1})
     }
   }
@@ -126,6 +126,15 @@ class App extends Component {
 
       // handle paddle COLLISION
       this.paddleCollision()
+
+      //check if game finished
+      this.didGameFinish()
+  }
+
+  didGameFinish = () => {
+    if(document.querySelectorAll(".block").length === 0){
+      this.lostGame()
+    }
   }
 
   startGame = () => {
@@ -175,10 +184,6 @@ class App extends Component {
 
   componentDidMount(){
     window.addEventListener("load", (e) => {
-
-      window.addEventListener("click", (currenMotion) => {
-        debugger
-      })
 
       window.addEventListener("keydown", (event) => {
         if(event.key === "s" || event.key === "S" && this.state.startGame === false){
@@ -235,7 +240,7 @@ class App extends Component {
       width: "100px",
       position: "absolute",
       left: this.state.paddleLeft,
-      bottom: 0
+      bottom: 0,
     }
 
     const ballStyle = {
@@ -273,7 +278,7 @@ class App extends Component {
           <Setting triggerGrayScale={this.triggerGrayScale}/>
         </div>}
 
-        {this.state.lostGame && <LostGame restartGame={this.restartGame}/>}
+        {this.state.lostGame && <LostGame restartGame={this.restartGame} score={this.state.counter}/>}
 
       </div>
     );
